@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Jatayu</title>
+	<meta charset="utf-8">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300|PT+Sans:700|Source+Sans+Pro:200,300,400,600" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="static/Style/index.css">
+	<link rel="shortcut icon" href="static/Images/favicon.ico" type="image/x-icon">
+	<script type="text/javascript" src="static/JS/index.js"></script>
+
+	<link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet"></link>
+	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
+	<script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
+</head>
+<body>
+
+
+
+	<main>
+		<div id="hero">
+			
+			<img id="herobird" src="static/Images/logo.png">
+			<h1><strong>Jatayu</strong></h1>
+			
+			<form action="/search" id="search" autocomplete="off">
+					<input id="source" type="search" name="q">
+        			<div id="result"></div>
+					<button id="mag" class="fas fa-search fa-lg"></button>
+			</form>
+			
+			
+			<div id="herotext">
+			<p>BirdEye View Of The World </p> &nbsp&nbsp <a href="#">Contribute To Us</a>
+			</div>
+		</div><!-- should take up entire screen -->
+
+
+		<div id="second">
+			<div class="uptop">
+			<h1 class="bigfont">We don't store your<br> personal information.</h1>
+			<p class="sectionfont">Our privacy policy is simple: we don’t collect <br>or share any of your personal information.</p>
+			<p class="sectionfont">Further We provide custom crawlers to scrape any website you want !</p>
+			<button class="bigbutton">Crawl A Website Now !</button>
+			</div>
+
+			<div class="scale">
+			<img class="imgscale" src="static/Images/no-information-stored.svg">
+			</div>
+		</div><!-- these going down should not take up too much screen, like 90% should be good -->
+
+
+
+	</main>
+<script>
+    const $source = document.querySelector('#source');
+	$('.ui-autocomplete-input').css('width','300px')
+
+    const typeHandler = function(e) {
+        console.log(e.target.value);
+
+        $.ajax({
+            url: "/autocomplete?q="+e.target.value,
+            type : 'GET',
+            cache: false,
+            success: function(html)
+            {
+                console.log(html)
+                var data = html
+                var _ = []
+
+                $.each(data, (index, value)=>{
+                    _.push($("<div/>").html(value.key).text())
+                });
+                
+
+                
+			$( "#source" ).autocomplete({		
+				source: _
+             });
+				
+            }
+        });
+    
+	}
+
+    
+	$source.addEventListener('input', typeHandler) // register for oninput
+    $source.addEventListener('propertychange', typeHandler) // for IE8
+
+
+
+</script>
+
+</body>
+</html>
