@@ -100,24 +100,33 @@ func GetSuggestions(query string) ([]byte, error) {
 
 }
 
-func ElasticSearch(result *Query) {
+func ElasticSearch(result *Query, pagenum int) error {
 	c := context.Background()
 
 	esQuery := elastic.NewMultiMatchQuery(result.Search, "title", "Description", "url").
 		Fuzziness("2").
 		MinimumShouldMatch("2")
 
+	start := pagenum*10 - 10
+	end := start + 10
+
 	searchResult, err := es.Search().
 		Index("educative").
 		Query(esQuery).
 		Sort("_score", false).
 		Sort("rank", false).
-		From(0).Size(10).Do(c)
+		From(start).Size(end).Do(c)
 
 	if err != nil {
 		log.Println(err)
 	}
-	if searchResult.Hits.TotalHits.Value > 0 {
+	count := searchResult.Hits.TotalHits.Value
+	for i := int64(0); i < count; i = i + 10 {
+		result.Pages = append(result.Pages, 1+i/10)
+	}
+	log.Println(result.Pages)
+
+	if count > 0 {
 		result.Number = searchResult.Hits.TotalHits.Value
 		result.Time = float64(searchResult.TookInMillis) / 1000
 
@@ -138,7 +147,7 @@ func ElasticSearch(result *Query) {
 			result.Results = append(result.Results, t)
 		}
 	} else {
-		// No hits
-		fmt.Print("not hits")
+		return fmt.Errorf("no Search Results")
 	}
+	return nil
 }

@@ -304,3 +304,7 @@ font-family: "Font Awesome 5 Free";
 span {
     height: 25px;
 }
+
+.pagenumber {
+	padding-left: 10px;
+}
