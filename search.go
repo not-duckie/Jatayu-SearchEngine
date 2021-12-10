@@ -29,6 +29,60 @@ func init() {
 	}
 }
 
+func did_you_mean(phrase string) (string, error) {
+	var err error
+	es, err := elasticsearch.NewDefaultClient()
+
+	if err != nil {
+		log.Fatalf("Error creating the client: %s", err)
+	}
+
+	data := `{
+				"size":0,
+				"suggest": 
+				{ "text":"%s", 
+				"educative": 
+				{ "phrase": { "field": "title" }}
+				},
+				"sort": {
+					"_score": "desc"
+				}
+				}
+		`
+	payload := fmt.Sprintf(data, phrase)
+
+	res, err := es.Search(
+		es.Search.WithBody(strings.NewReader(payload)))
+	if err != nil {
+		log.Println("something went wrong while suggestion", err)
+		return "", err
+	}
+
+	buf, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println("error while reading response", err)
+		return "", err
+	}
+	defer res.Body.Close()
+
+	var tmp interface{}
+	json.Unmarshal(buf, &tmp)
+
+	suggest := tmp.(map[string]interface{})["suggest"]
+
+	results := suggest.(map[string]interface{})["educative"]
+
+	options := results.([]interface{})[0].(map[string]interface{})["options"]
+
+	if len(options.([]interface{})) == 0 {
+		return "", fmt.Errorf("no suggestions")
+	}
+
+	output := options.([]interface{})[0].(map[string]interface{})["text"].(string)
+
+	return output, nil
+}
+
 func GetSuggestions(query string) ([]byte, error) {
 	data := `{
 		  "_source": ["educative"],
@@ -143,6 +197,15 @@ func ElasticSearch(result *Query, pagenum int) error {
 	result.Number = int64(total.(map[string]interface{})["value"].(float64))
 
 	count := result.Number
+	if result.Number == 0 {
+		result.Pages = append(result.Pages, 1)
+		result.Suggestion, err = did_you_mean(result.Search)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("no result found")
+	}
+
 	for i := int64(0); i < count; i = i + 10 {
 		result.Pages = append(result.Pages, 1+i/10)
 	}

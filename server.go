@@ -11,11 +11,12 @@ import (
 )
 
 type Query struct {
-	Search  string
-	Results []Result
-	Number  int64
-	Time    float64
-	Pages   []int64
+	Search     string
+	Suggestion string
+	Number     int64
+	Time       float64
+	Pages      []int64
+	Results    []Result
 }
 
 func Homepage(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +52,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		result.Search = html.EscapeString(value[0])
 		err := ElasticSearch(result, pagenum)
 		if err != nil {
-			tmp, _ := template.ParseFiles("templates/no_results.html")
+			if err.Error() == "no suggestions" {
+				tmp, _ := template.ParseFiles("templates/no_results.html")
+				tmp.Execute(w, result)
+				return
+			}
+			tmp, _ := template.ParseFiles("templates/no_results_with_suggestions.html")
 			tmp.Execute(w, result)
 			return
 		}
