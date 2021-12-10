@@ -3,11 +3,13 @@ package crawler
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type MetaData struct {
@@ -17,25 +19,30 @@ type MetaData struct {
 	Description string `json:"description"`
 }
 
-func fetchMeta(page string, meta *MetaData) {
+func fetchMeta(page string, meta *MetaData) error {
 	if !(strings.Contains(page, "http") || strings.Contains(page, "https")) {
 		page = "https:" + page
 	}
 	rank := 1
 
 	log.Println("crawling ", page)
-	resp, err := http.Get(page)
+
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	resp, err := client.Get(page)
 	if err != nil {
 		log.Println("Something went wrong file feteching ", page)
-		return
+		return err
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		return
+		return fmt.Errorf("page not found")
 	}
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Error while reading the body")
-		return
+		return err
 	}
 	defer resp.Body.Close()
 
@@ -73,19 +80,29 @@ func fetchMeta(page string, meta *MetaData) {
 	meta.Rank = rank
 
 	if string(title) == "" {
-		return
+		return fmt.Errorf("empty Title")
 	}
+
+	return nil
 }
 
-func fetchUrl(url string) map[string]bool {
-	resp, err := http.Get(url)
+func fetchUrl(url string) (map[string]bool, error) {
+
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	resp, err := client.Get(url)
+
 	if err != nil {
 		log.Println("Something went wrong while fetching ", url)
+		return nil, err
 	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Failed to read response of ", url)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -95,7 +112,7 @@ func fetchUrl(url string) map[string]bool {
 	for _, i := range tmp {
 		urlList[string(i)] = false
 	}
-	return urlList
+	return urlList, nil
 }
 
 func sendToElastic(meta *MetaData) {
@@ -122,16 +139,24 @@ func sendToElastic(meta *MetaData) {
 
 }
 
-func InitiateCrawler(url string) {
+func InitiateCrawler(url string) error {
 	meta := &MetaData{}
 	log.Println("Starting crawler for url := ", url)
 
 	//urlList := append(fetchUrl(url), []byte(url))
-	urlList := fetchUrl(url)
+	urlList, err := fetchUrl(url)
+	if err != nil {
+		return err
+	}
 	urlList[url] = false
 	for page := range urlList {
-		fetchMeta(page, meta)
+		err := fetchMeta(page, meta)
+
+		if err != nil {
+			log.Printf("skiping %v.\nreason %v", page, err)
+		}
 		sendToElastic(meta)
 		//log.Println(meta)
 	}
+	return nil
 }

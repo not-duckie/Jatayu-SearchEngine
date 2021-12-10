@@ -73,7 +73,7 @@ func Autocomplete(w http.ResponseWriter, r *http.Request) {
 
 		//log.Println("got value", value[0])
 
-		result, err := GetSuggestions(value[0])
+		result, err := GetSuggestions(html.EscapeString(value[0]))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("{Something went wrong}"))
@@ -95,7 +95,11 @@ func Crawler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("Invalid url provided!!!"))
 		} else {
-			crawler.InitiateCrawler(website)
+			err := crawler.InitiateCrawler(website)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Something Went Wrong"))
+			}
 		}
 	}
 
