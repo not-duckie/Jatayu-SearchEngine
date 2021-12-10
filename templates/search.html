@@ -54,7 +54,7 @@
 		<tr>
 			{{range $v := .Pages}}
 			<td>
-				<a class="pagenumber" aria-label="Page {{$v}}" class="fl" href="/search?q={{$.Search}}&page={{$v}}">{{$v}}</a>
+				<a style="text-decoration:none;" class="pagenumber" aria-label="Page {{$v}}" class="fl" href="/search?q={{$.Search}}&page={{$v}}">{{$v}}</a>
 			</td>
 			<!--<td aria-level="3" class="d6cvqb BBwThe" role="heading"><a href="/search?q=google" style="text-align:left">Next</a></td>-->
 			{{end}}
