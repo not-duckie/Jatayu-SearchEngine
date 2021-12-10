@@ -24,7 +24,7 @@ var es *elastic.Client
 
 func init() {
 	var err error
-	es, err = elastic.NewClient(elastic.SetURL("http://127.0.0.1:8081"))
+	es, err = elastic.NewClient()
 	if err != nil {
 		panic("Elasitc Search Server Is Down!!!!!!\n " + err.Error())
 	}

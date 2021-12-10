@@ -26,7 +26,7 @@
 			<h1><strong>Jatayu</strong></h1>
 			
 			<form action="/search" id="search" autocomplete="off">
-					<input id="source" type="search" name="q">
+					<input spellcheck="false" id="source" type="search" name="q">
         			<div id="result"></div>
 					<button id="mag" class="fas fa-search fa-lg"></button>
 			</form>
@@ -79,7 +79,13 @@
                 
 			$( "#source" ).autocomplete({		
 				source: _
-             });
+             }).data("ui-autocomplete")._renderItem = function( ul, item ) {
+            let txt = String(item.value).replace(new RegExp(this.term, "gi"),"<b style=\"color:#58B792;\">$&</b>");
+            return $("<li></li>")
+                .data("ui-autocomplete-item", item)
+                .append("<a>" + txt + "</a>")
+                .appendTo(ul);
+        };
 				
             }
         });

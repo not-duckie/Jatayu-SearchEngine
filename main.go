@@ -1,15 +1,14 @@
 package main
 
 import (
-	"jatayu/crawler"
 	"net/http"
 )
 
 func main() {
 
-	url := "https://www.ndtv.com/"
+//	url := "https://www.ndtv.com/"
 
-	crawler.InitiateCrawler(url)
+//	crawler.InitiateCrawler(url)
 
 	http.HandleFunc("/", Homepage)
 	http.Handle("/static/", http.FileServer(http.Dir("./templates")))
