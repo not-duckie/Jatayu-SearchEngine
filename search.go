@@ -124,7 +124,8 @@ func ElasticSearch(result *Query, pagenum int) error {
 	for i := int64(0); i < count; i = i + 10 {
 		result.Pages = append(result.Pages, 1+i/10)
 	}
-	log.Println(result.Pages)
+
+	//log.Println(result.Pages)
 
 	if count > 0 {
 		result.Number = searchResult.Hits.TotalHits.Value

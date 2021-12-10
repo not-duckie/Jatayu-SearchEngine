@@ -2,8 +2,10 @@ package main
 
 import (
 	"html"
+	"jatayu/crawler"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"text/template"
 )
@@ -68,7 +70,9 @@ func Autocomplete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if value, ok := r.URL.Query()["q"]; ok {
-		log.Println("got value", value[0])
+
+		//log.Println("got value", value[0])
+
 		result, err := GetSuggestions(value[0])
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -81,5 +85,25 @@ func Autocomplete(w http.ResponseWriter, r *http.Request) {
 }
 
 func Crawler(w http.ResponseWriter, r *http.Request) {
-	log.Println("HIT autocomplete")
+	var website string
+	if r.Method == "POST" {
+		r.ParseForm()
+		website = string(r.FormValue("website"))
+
+		_, err := url.ParseRequestURI(website)
+		if err != nil {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Invalid url provided!!!"))
+		} else {
+			crawler.InitiateCrawler(website)
+		}
+	}
+
+	tmpl, err := template.ParseFiles("templates/crawler.html")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something Went Wrong"))
+	}
+
+	tmpl.Execute(w, nil)
 }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Jatayu</title>
+	<meta charset="utf-8">
+
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300|PT+Sans:700|Source+Sans+Pro:200,300,400,600" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="static/Style/crawl.css">
+	<link rel="shortcut icon" href="static/Images/favicon.ico" type="image/x-icon">
+
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+	
+</head>
+<body>
+
+
+
+	<main>
+		<div id="hero">
+			
+			<img id="herobird" src="static/Images/logo.png">
+			<h1><strong>Crawl A Website</strong></h1>
+			
+			<div id="search">
+					<input spellcheck="false" id="source" type="search" name="crawl">
+					<buttom  onclick="main();" id="mag" class="fas fa-search fa-lg"></button>
+			</div>
+
+			<div id="loading" style="display: none;">
+				<div id="loading-wrapper">
+					<div id="loading-text">CRAWLING</div>
+					<div id="loading-content"></div>
+				</div>
+			</div>
+			
+			
+			<div id="herotext">
+			<p id="change">BirdEye View Of The World</p> &nbsp&nbsp
+			</div>
+		</div><!-- should take up entire screen -->
+
+
+
+	</main>
+<script>
+function makePostRequest(path) {
+    return new Promise(function (resolve, reject) {
+        axios.post(path,"website="+document.getElementById("source").value).then(
+            (response) => {
+                var result = response.data;
+                console.log('Processing Request');
+                resolve(result);
+            },
+                (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+  
+async function main() {
+    document.getElementById("loading").style = "";
+	
+	try {
+		await makePostRequest('/crawler');
+		document.getElementById("loading").style = "display: none;";
+		document.getElementById("change").innerHTML = "<b>Crawling Done. Database is update :D</b>"
+	
+	} catch (e){
+		document.getElementById("loading").style = "display: none;";
+		document.getElementById("change").innerHTML = "<b>Please Enter a valid url</b>"
+	}
+}
+
+var input = document.getElementById("source");
+
+
+input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    document.getElementById("mag").click();
+  }
+});
+</script>
+</body>
+</html>
