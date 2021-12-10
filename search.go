@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -10,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/elastic/go-elasticsearch"
-	"github.com/olivere/elastic/v7"
 )
 
 type Result struct {
@@ -20,15 +18,15 @@ type Result struct {
 	Url         string `json:"url"`
 }
 
-var es *elastic.Client
+var es *elasticsearch.Client
 
 func init() {
 	var err error
-	es, err = elastic.NewClient()
+	es, err = elasticsearch.NewDefaultClient()
+
 	if err != nil {
-		panic("Elasitc Search Server Is Down!!!!!!\n " + err.Error())
+		log.Fatalf("Error creating the client: %s", err)
 	}
-	log.Println("es initialized")
 }
 
 func GetSuggestions(query string) ([]byte, error) {
@@ -66,7 +64,7 @@ func GetSuggestions(query string) ([]byte, error) {
 		}`
 	payload := fmt.Sprintf(data, html.EscapeString(query))
 
-	es, _ := elasticsearch.NewDefaultClient()
+	//es, _ := elasticsearch.NewDefaultClient()
 
 	res, err := es.Search(
 		es.Search.WithBody(strings.NewReader(payload)),
@@ -101,54 +99,69 @@ func GetSuggestions(query string) ([]byte, error) {
 }
 
 func ElasticSearch(result *Query, pagenum int) error {
-	c := context.Background()
 
-	esQuery := elastic.NewMultiMatchQuery(result.Search, "title", "Description", "url").
-		Fuzziness("2").
-		MinimumShouldMatch("2")
+	data := `{
+			"sort" : {
+				"_score": "desc",
+				"rank": "desc"
+			},
+			"query": {
+				"multi_match" : {
+				"query":    "%s", 
+				"fields": [ "title", "description","url" ] 
+				}
+			}
+		}
+		`
 
-	start := pagenum*10 - 10
-	end := start + 10
+	payload := fmt.Sprintf(data, html.EscapeString(result.Search))
+	resp, err := es.Search(
+		es.Search.WithBody(strings.NewReader(payload)),
+	)
+	if err != nil {
+		log.Println("error while searching", err)
+		return err
+	}
 
-	searchResult, err := es.Search().
-		Index("educative").
-		Query(esQuery).
-		Sort("_score", false).
-		Sort("rank", false).
-		From(start).Size(end).Do(c)
+	buf, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("error while reading response", err)
+		return err
 	}
-	count := searchResult.Hits.TotalHits.Value
+	defer resp.Body.Close()
+
+	var tmp interface{}
+
+	json.Unmarshal(buf, &tmp)
+
+	result.Time = tmp.(map[string]interface{})["took"].(float64) / 1000
+
+	hits := tmp.(map[string]interface{})["hits"]
+	total := hits.(map[string]interface{})["total"]
+
+	result.Number = int64(total.(map[string]interface{})["value"].(float64))
+
+	count := result.Number
 	for i := int64(0); i < count; i = i + 10 {
 		result.Pages = append(result.Pages, 1+i/10)
 	}
 
-	//log.Println(result.Pages)
+	results := hits.(map[string]interface{})["hits"]
 
-	if count > 0 {
-		result.Number = searchResult.Hits.TotalHits.Value
-		result.Time = float64(searchResult.TookInMillis) / 1000
+	res := Result{}
 
-		// Iterate through results
-		for _, hit := range searchResult.Hits.Hits {
-			// hit.Index contains the name of the index
+	for _, i := range results.([]interface{}) {
+		source := (i.(map[string]interface{})["_source"])
 
-			// Deserialize hit.Source into a Tweet (could also be just a map[string]interface{}).
-			var t Result
-			err := json.Unmarshal(hit.Source, &t)
-			if err != nil {
-				// Deserialization failed
-				log.Println("deserilisation failed")
-			}
-			//t.Title = html.UnescapeString(t.Title)
-			//t.Description = html.UnescapeString(t.Description)
+		//wtf do i do with rank ?
+		res.Rank = int(source.(map[string]interface{})["rank"].(float64))
 
-			result.Results = append(result.Results, t)
-		}
-	} else {
-		return fmt.Errorf("no Search Results")
+		res.Title = source.(map[string]interface{})["title"].(string)
+		res.Url = source.(map[string]interface{})["url"].(string)
+		res.Description = source.(map[string]interface{})["description"].(string)
+
+		result.Results = append(result.Results, res)
 	}
 	return nil
 }
