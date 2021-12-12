@@ -156,6 +156,8 @@ func GetSuggestions(query string) ([]byte, error) {
 func ElasticSearch(result *Query, pagenum int) error {
 
 	data := `{
+			"from":"%v",
+			"size":"10",
 			"sort" : {
 				"_score": "desc",
 				"rank": "desc"
@@ -169,7 +171,8 @@ func ElasticSearch(result *Query, pagenum int) error {
 		}
 		`
 
-	payload := fmt.Sprintf(data, html.EscapeString(result.Search))
+	from := pagenum*10 - 10
+	payload := fmt.Sprintf(data, from, html.EscapeString(result.Search))
 	resp, err := es.Search(
 		es.Search.WithBody(strings.NewReader(payload)),
 	)

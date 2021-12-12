@@ -50,25 +50,31 @@ func fetchMeta(page string, meta *MetaData) error {
 		log.Fatal(err)
 	}
 	//fetching title
-	title = doc.Find("title").Text()
+	doc.Find("title").EachWithBreak(func(_ int, s *goquery.Selection) bool {
+		title = s.Text()
+		return false
+	})
 
 	//feteching description
-	doc.Find("meta").Each(func(_ int, s *goquery.Selection) {
+	doc.Find("meta").EachWithBreak(func(_ int, s *goquery.Selection) bool {
 		if val, ok := s.Attr("name"); ok {
 			if val == "description" || val == "twitter:description" {
 				description = s.AttrOr("content", "")
+				return false
 			}
 		}
+		return true
 	})
 
 	//fetching favicon
-	doc.Find("link").Each(func(_ int, s *goquery.Selection) {
+	doc.Find("link").EachWithBreak(func(_ int, s *goquery.Selection) bool {
 		if val, ok := s.Attr("rel"); ok {
 			if url, ok := s.Attr("href"); ok && val == "shortcut icon" {
 				favicon = url
-				return
+				return false
 			}
 		}
+		return true
 	})
 
 	if string(title) != "" {
