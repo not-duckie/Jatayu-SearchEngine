@@ -25,7 +25,7 @@ type MetaData struct {
 }
 
 func checkImage(url string) bool {
-	for _, i := range []string{"jpg", "jpeg", "png", "bmp", "svg", "xml", "ico", "JPG", "JPEG", "PNG", "BMP", "SVG", "XML", "ICO"} {
+	for _, i := range []string{"jpg", "jpeg", "png", "bmp", "svg", "ico", "JPG", "JPEG", "PNG", "BMP", "SVG", "ICO"} {
 		if ok := strings.HasSuffix(url, i); ok {
 			return true
 		}

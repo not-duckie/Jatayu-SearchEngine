@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/elastic/go-elasticsearch"
+	"github.com/elastic/go-elasticsearch/esapi"
 )
 
 type Result struct {
@@ -31,9 +32,37 @@ func init() {
 	}
 }
 
-func did_you_mean(phrase string) (string, error) {
+func did_you_mean(phrase string, image bool) (string, error) {
 
-	data := `{
+	var data, payload string
+
+	var res *esapi.Response
+	var err error
+
+	if image {
+
+		data = `{
+				"size":0,
+				"suggest": 
+				{ "text":"%s", 
+				"searchengine": 
+				{ "phrase": { "field": "url" }}
+				},
+				"sort": {
+					"_score": "desc"
+				}
+		}`
+
+		payload = fmt.Sprintf(data, phrase)
+
+		res, err = es.Search(
+			es.Search.WithBody(strings.NewReader(payload)),
+			es.Search.WithIndex("searchengine_images"),
+		)
+
+	} else {
+
+		data = `{
 				"size":0,
 				"suggest": 
 				{ "text":"%s", 
@@ -45,12 +74,13 @@ func did_you_mean(phrase string) (string, error) {
 				}
 		}`
 
-	payload := fmt.Sprintf(data, phrase)
+		payload = fmt.Sprintf(data, phrase)
 
-	res, err := es.Search(
-		es.Search.WithBody(strings.NewReader(payload)),
-		es.Search.WithIndex("searchengine"),
-	)
+		res, err = es.Search(
+			es.Search.WithBody(strings.NewReader(payload)),
+			es.Search.WithIndex("searchengine"),
+		)
+	}
 
 	if err != nil {
 		log.Println("something went wrong while suggestion", err)
@@ -204,7 +234,10 @@ func ImageSearch(result *Query, pagenum int) error {
 	count := result.Number
 	if result.Number == 0 {
 		result.Pages = append(result.Pages, 1)
-		result.Suggestion, err = did_you_mean(result.Search)
+		result.Suggestion, err = did_you_mean(result.Search, true)
+
+		log.Println(result.Suggestion)
+
 		if err != nil {
 			return err
 		}
@@ -282,7 +315,7 @@ func ElasticSearch(result *Query, pagenum int) error {
 	count := result.Number
 	if result.Number == 0 {
 		result.Pages = append(result.Pages, 1)
-		result.Suggestion, err = did_you_mean(result.Search)
+		result.Suggestion, err = did_you_mean(result.Search, false)
 
 		log.Println(result.Suggestion)
 
