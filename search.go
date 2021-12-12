@@ -16,6 +16,7 @@ type Result struct {
 	Description string `json:"description"`
 	Rank        int    `json:"rank"`
 	Url         string `json:"url"`
+	Favicon     string `json:"favicon"`
 }
 
 var es *elasticsearch.Client
@@ -223,6 +224,7 @@ func ElasticSearch(result *Query, pagenum int) error {
 		res.Title = source.(map[string]interface{})["title"].(string)
 		res.Url = source.(map[string]interface{})["url"].(string)
 		res.Description = source.(map[string]interface{})["description"].(string)
+		res.Favicon = source.(map[string]interface{})["favicon"].(string)
 
 		result.Results = append(result.Results, res)
 	}

@@ -43,8 +43,15 @@
 		
 		{{range $v := .Results}}
 		<section class="website-container">
-			<!--<img src="#" height="14" width="14"></img>-->
-			<h2><a href="{{$v.Url}}">{{$v.Title}}</a></h2>
+			<h2>
+			{{if $v.Favicon }}
+			<img src="{{$v.Favicon}}" height="14" width="14"></img>
+			<a style="padding-left: 25px;" href="{{$v.Url}}">{{$v.Title}}</a>
+			{{else}}
+			<!--<img src="{{$v.Favicon}}" height="14" width="14"></img>-->
+			<a href="{{$v.Url}}">{{$v.Title}}</a>
+			{{end}}
+			</h2>
 			<i><div class="smoll" role="text">{{$v.Url}}</div></i>
 			<p class="para">{{$v.Description}}</a></p>
 		</section>
