@@ -10,7 +10,7 @@
  }
  
  body{
-    background: #ffffff; /* Set background color to a lightish black/grey */
+    background: #f7f7f7; /* Set background color to a lightish black/grey */
     margin: 0; /* Remove padding & margins from body */
     padding: 0;
     height: calc(100vh - 5rem );
@@ -24,7 +24,7 @@ width: 100%;
     display: flex; /* Align everything in the center vertically & put content on the left */
     align-items: center;
     justify-content: left;
-    background: rgb(255, 255, 255); /* Darker background for the top search portion */
+    background: #f7f7f7; /* Darker background for the top search portion */
     height: 5rem; /* Set the height */
     position: sticky;
     z-index: 1;
