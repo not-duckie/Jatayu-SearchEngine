@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 type MetaData struct {
@@ -17,6 +19,7 @@ type MetaData struct {
 	Url         string `json:"url"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Favicon     string `json:"favicon"`
 }
 
 func fetchMeta(page string, meta *MetaData) error {
@@ -36,35 +39,37 @@ func fetchMeta(page string, meta *MetaData) error {
 		log.Println("Something went wrong file feteching ", page)
 		return err
 	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("page not found")
 	}
-	data, err := io.ReadAll(resp.Body)
+
+	var title, description, favicon string
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		log.Println("Error while reading the body")
-		return err
+		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+	//fetching title
+	title = doc.Find("title").Text()
 
-	titleRegex := regexp.MustCompile(`<title[^<>]*>[^<>]+</title>`)
-	descrpRegex := regexp.MustCompile(`<meta[^><]+name=("|')+(d|D)escription"* content="?[^"><]+"?`)
+	//feteching description
+	doc.Find("meta").Each(func(_ int, s *goquery.Selection) {
+		if val, ok := s.Attr("name"); ok {
+			if val == "description" || val == "twitter:description" {
+				description = s.AttrOr("content", "")
+			}
+		}
+	})
 
-	clean1Desc := regexp.MustCompile(`<meta[^><]+name="?(d|D)escription"? (c|C)ontent="`)
-	clean2Desc := regexp.MustCompile(`".*`)
-
-	clean1Title := regexp.MustCompile(`<(t|T)itle[^<>]*>`)
-	clean2Title := regexp.MustCompile(`</(t|T)itle>`)
-
-	title := titleRegex.Find(data)
-	description := descrpRegex.Find(data)
-
-	description = []byte(clean1Desc.ReplaceAllString(string(description), ""))
-	description = []byte(clean2Desc.ReplaceAllString(string(description), ""))
-
-	title = []byte(clean1Title.ReplaceAllString(string(title), ""))
-	title = []byte(clean2Title.ReplaceAllString(string(title), ""))
-
-	//log.Printf("%s", title)
+	//fetching favicon
+	doc.Find("link").Each(func(_ int, s *goquery.Selection) {
+		if val, ok := s.Attr("rel"); ok {
+			if url, ok := s.Attr("href"); ok && val == "shortcut icon" {
+				favicon = url
+				return
+			}
+		}
+	})
 
 	if string(title) != "" {
 		rank = rank + 3
@@ -72,11 +77,11 @@ func fetchMeta(page string, meta *MetaData) error {
 	if string(description) != "" {
 		rank = rank + 2
 	}
-	//log.Printf("%s", description)
 
 	meta.Url = page
 	meta.Title = string(title)
 	meta.Description = string(description)
+	meta.Favicon = favicon
 	meta.Rank = rank
 
 	if string(title) == "" {
@@ -115,8 +120,8 @@ func fetchUrl(url string) (map[string]bool, error) {
 	return urlList, nil
 }
 
-func sendToElastic(meta *MetaData) {
-	url := "http://127.0.0.1:9200/educative/_doc"
+func sendToElastic(meta *MetaData) error {
+	url := "http://127.0.0.1:9200/searchengine/_doc"
 	data, err := json.Marshal(meta)
 	if err != nil {
 		log.Println("unable to json encode the payload ", meta)
@@ -127,16 +132,18 @@ func sendToElastic(meta *MetaData) {
 	client := http.Client{}
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return err
 	}
 
 	// set the request header Content-Type for json
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	_, err = client.Do(req)
 	if err != nil {
-		panic("Error sending request to elastic search")
+		log.Println("Error sending request to elastic search")
+		return err
 	}
-
+	return nil
 }
 
 func InitiateCrawler(url string) error {
@@ -155,7 +162,9 @@ func InitiateCrawler(url string) error {
 		if err != nil {
 			log.Printf("skiping %v.\nreason %v", page, err)
 		}
-		sendToElastic(meta)
+		if err := sendToElastic(meta); err != nil {
+			return err
+		}
 		//log.Println(meta)
 	}
 	return nil

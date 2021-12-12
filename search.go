@@ -41,7 +41,7 @@ func did_you_mean(phrase string) (string, error) {
 				"size":0,
 				"suggest": 
 				{ "text":"%s", 
-				"educative": 
+				"searchengine": 
 				{ "phrase": { "field": "title" }}
 				},
 				"sort": {
@@ -70,7 +70,7 @@ func did_you_mean(phrase string) (string, error) {
 
 	suggest := tmp.(map[string]interface{})["suggest"]
 
-	results := suggest.(map[string]interface{})["educative"]
+	results := suggest.(map[string]interface{})["searchengine"]
 
 	options := results.([]interface{})[0].(map[string]interface{})["options"]
 
@@ -85,7 +85,7 @@ func did_you_mean(phrase string) (string, error) {
 
 func GetSuggestions(query string) ([]byte, error) {
 	data := `{
-		  "_source": ["educative"],
+		  "_source": ["searchengine"],
 		  "size": 0,
 		  "min_score": 0.5,
 		  "query": {
