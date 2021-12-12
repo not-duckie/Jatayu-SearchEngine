@@ -15,6 +15,7 @@ func main() {
 	http.HandleFunc("/crawler", Crawler)
 	http.HandleFunc("/search", Search)
 	http.HandleFunc("/autocomplete", Autocomplete)
+	http.HandleFunc("/images", Image)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)

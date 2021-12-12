@@ -90,6 +90,48 @@ func Autocomplete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Image(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("templates/images.html")
+	result := &Query{}
+	var pagenum int
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	if value, ok := r.URL.Query()["q"]; ok {
+		if page, ok := r.URL.Query()["page"]; ok {
+			pagenum, err = strconv.Atoi(page[0])
+			if err != nil {
+				pagenum = 1
+			}
+		} else {
+			pagenum = 1
+		}
+
+		result.Search = html.EscapeString(value[0])
+
+		err := ImageSearch(result, pagenum)
+
+		if err != nil {
+			if err.Error() == "no suggestions" {
+				tmp, _ := template.ParseFiles("templates/no_results_images.html")
+				tmp.Execute(w, result)
+				return
+			}
+			tmp, _ := template.ParseFiles("templates/no_results_with_suggestions_images.html")
+			tmp.Execute(w, result)
+			return
+		}
+
+		tmpl.Execute(w, result)
+		return
+
+	}
+
+	tmpl.Execute(w, result)
+}
+
 func Crawler(w http.ResponseWriter, r *http.Request) {
 	var website string
 	if r.Method == "POST" {

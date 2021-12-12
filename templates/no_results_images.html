@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/Style/search_style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/v4-shims.css">
+    <title>Jatayu</title>
+</head>
+<body>
+	
+	<!-- Header Section-->
+	
+	<section class="header">
+        <a href="/"><img class="jatayu-logo" href="/" src="static/Images/logo.png" /></a>
+        <form method="GET" action="/images">
+				<input type="text" name="q" id="search-text" value="{{.Search}}"></input>
+                <!--<span class="search-icon" id="delete" onclick="document.getElementById('search-text').value=''">&times</span> -->
+                <button class="search-icon" ><i class="fas fa-search"></i></button>
+		</form>
+    </section>
+	
+	<!-- Results -->
+	<main class="search-results">
+
+		<section class="website-container">
+			<!--<img src="#" height="14" width="14"></img>-->
+			<h3>No Results Found </h3>
+		</section>
+
+	</main> 
+	
+</body>
+
+</html>

@@ -25,7 +25,7 @@ type MetaData struct {
 }
 
 func checkImage(url string) bool {
-	for _, i := range []string{"jpg", "jpeg", "png", "bmp", "svg", "xml"} {
+	for _, i := range []string{"jpg", "jpeg", "png", "bmp", "svg", "xml", "ico", "JPG", "JPEG", "PNG", "BMP", "SVG", "XML", "ICO"} {
 		if ok := strings.HasSuffix(url, i); ok {
 			return true
 		}
@@ -33,7 +33,7 @@ func checkImage(url string) bool {
 	return false
 }
 
-func fetchMeta(page string, meta *MetaData) error {
+func fetchMeta(page string, meta *MetaData) (bool, error) {
 	if !(strings.Contains(page, "http") || strings.Contains(page, "https")) {
 		page = "https:" + page
 	}
@@ -48,10 +48,10 @@ func fetchMeta(page string, meta *MetaData) error {
 	resp, err := client.Get(page)
 	if err != nil {
 		log.Println("Something went wrong file feteching ", page)
-		return err
+		return false, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("page not found")
+		return false, fmt.Errorf("page not found")
 	}
 
 	var title, description, favicon string
@@ -101,17 +101,11 @@ func fetchMeta(page string, meta *MetaData) error {
 	meta.Favicon = favicon
 	meta.Rank = rank
 
-	if checkImage(title) {
-		meta.TypeDoc = "image"
+	if checkImage(meta.Url) {
+		return true, nil
 	} else {
-		meta.TypeDoc = "not image"
+		return false, nil
 	}
-
-	if string(title) == "" {
-		return fmt.Errorf("empty Title")
-	}
-
-	return nil
 }
 
 func fetchUrl(url string) (map[string]bool, error) {
@@ -143,8 +137,13 @@ func fetchUrl(url string) (map[string]bool, error) {
 	return urlList, nil
 }
 
-func sendToElastic(meta *MetaData) error {
-	url := "http://127.0.0.1:9200/searchengine/_doc"
+func sendToElastic(meta *MetaData, image bool) error {
+	var url string
+	if image {
+		url = "http://127.0.0.1:9200/searchengine_images/_doc"
+	} else {
+		url = "http://127.0.0.1:9200/searchengine/_doc"
+	}
 	data, err := json.Marshal(meta)
 	if err != nil {
 		log.Println("unable to json encode the payload ", meta)
@@ -180,12 +179,12 @@ func InitiateCrawler(url string) error {
 	}
 	urlList[url] = false
 	for page := range urlList {
-		err := fetchMeta(page, meta)
+		img, err := fetchMeta(page, meta)
 
 		if err != nil {
 			log.Printf("skiping %v.\nreason %v", page, err)
 		}
-		if err := sendToElastic(meta); err != nil {
+		if err := sendToElastic(meta, img); err != nil {
 			return err
 		}
 		//log.Println(meta)

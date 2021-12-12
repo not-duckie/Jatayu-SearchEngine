@@ -1,0 +1,62 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/Style/search_style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/v4-shims.css">
+
+    <title>Jatayu | Images</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="static/Style/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+	<link href="static/Style/search_style.css" rel="stylesheet">
+
+</head>
+
+<body>
+		
+		
+		<section class="header">
+			<a href="/"><img class="jatayu-logo" href="/" src="static/Images/logo.png" /></a>
+			<form method="GET" action="/images">
+					<input type="text" name="q" id="search-text" value="{{.Search}}" required autocomplete="off"></input>
+					<!--<span class="search-icon" id="delete" onclick="document.getElementById('search-text').value=''">&times</span> -->
+					<button class="search-icon" ><i class="fas fa-search"></i></button>
+			</form>
+		</section>
+
+	<div class="result-stats">About {{.Number}} results <nobr>({{.Time}} seconds)&nbsp;</nobr></div>
+	<!-- Results -->
+        
+	<div class="row text-center">
+        
+		{{range $v := .Results}}
+				<div class="col-md-3 col-sm-6 hero-feature">
+						<div class="thumbnail">
+							<a href="{{$v.Url}}"><img src="https://external-content.duckduckgo.com/iu/?u={{$v.Url}}&pid=Api" alt=""></a>
+						</div>
+				</div>
+		{{end}}
+	</div>
+	<center>
+		<tr>
+			{{range $v := .Pages}}
+			<td>
+				<a style="text-decoration:none;" class="pagenumber" aria-label="Page {{$v}}" class="fl" href="/images?q={{$.Search}}&page={{$v}}">{{$v}}</a>
+			</td>
+			<!--<td aria-level="3" class="d6cvqb BBwThe" role="heading"><a href="/search?q=google" style="text-align:left">Next</a></td>-->
+			{{end}}
+		</tr>
+	</center>
+</body>
+
+</html>

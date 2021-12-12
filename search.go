@@ -49,7 +49,7 @@ func did_you_mean(phrase string) (string, error) {
 				"sort": {
 					"_score": "desc"
 				}
-				}
+			}
 		`
 	payload := fmt.Sprintf(data, phrase)
 
@@ -123,6 +123,7 @@ func GetSuggestions(query string) ([]byte, error) {
 	//es, _ := elasticsearch.NewDefaultClient()
 
 	res, err := es.Search(
+		es.Search.WithIndex("searchengine"),
 		es.Search.WithBody(strings.NewReader(payload)),
 	)
 	if err != nil {
@@ -154,6 +155,84 @@ func GetSuggestions(query string) ([]byte, error) {
 
 }
 
+func ImageSearch(result *Query, pagenum int) error {
+
+	data := `{
+			"from":"%v",
+			"size":"10",
+			"sort" : {
+				"_score": "desc",
+				"rank": "desc"
+			},
+			"query": {
+				"multi_match" : {
+				"query":    "%s", 
+				"fields": [ "url" ] 
+				}
+			}
+		}
+		`
+
+	from := pagenum*10 - 10
+	payload := fmt.Sprintf(data, from, html.EscapeString(result.Search))
+	resp, err := es.Search(
+		es.Search.WithIndex("searchengine_images"),
+		es.Search.WithBody(strings.NewReader(payload)),
+	)
+	if err != nil {
+		log.Println("error while searching", err)
+		return err
+	}
+
+	buf, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Println("error while reading response", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	var tmp interface{}
+
+	json.Unmarshal(buf, &tmp)
+
+	result.Time = tmp.(map[string]interface{})["took"].(float64) / 1000
+
+	hits := tmp.(map[string]interface{})["hits"]
+	total := hits.(map[string]interface{})["total"]
+
+	result.Number = int64(total.(map[string]interface{})["value"].(float64))
+
+	count := result.Number
+	if result.Number == 0 {
+		result.Pages = append(result.Pages, 1)
+		result.Suggestion, err = did_you_mean(result.Search)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("no result found")
+	}
+
+	for i := int64(0); i < count; i = i + 10 {
+		result.Pages = append(result.Pages, 1+i/10)
+	}
+
+	results := hits.(map[string]interface{})["hits"]
+
+	res := Result{}
+
+	for _, i := range results.([]interface{}) {
+		source := (i.(map[string]interface{})["_source"])
+
+		res.Url = source.(map[string]interface{})["url"].(string)
+
+		result.Results = append(result.Results, res)
+
+		log.Println(result.Results)
+	}
+	return nil
+}
+
 func ElasticSearch(result *Query, pagenum int) error {
 
 	data := `{
@@ -175,6 +254,7 @@ func ElasticSearch(result *Query, pagenum int) error {
 	from := pagenum*10 - 10
 	payload := fmt.Sprintf(data, from, html.EscapeString(result.Search))
 	resp, err := es.Search(
+		es.Search.WithIndex("searchengine"),
 		es.Search.WithBody(strings.NewReader(payload)),
 	)
 	if err != nil {

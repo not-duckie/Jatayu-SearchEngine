@@ -43,8 +43,7 @@
 		
 		{{range $v := .Results}}
 		<section class="website-container">
-			{{if eq $v.Image "image"}}
-			<div></div>
+			{{if eq $v.TypeDoc "image"}}
 			{{else}}
 				<h2>
 				{{if $v.Favicon }}

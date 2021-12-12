@@ -24,7 +24,6 @@ width: 100%;
     display: flex; /* Align everything in the center vertically & put content on the left */
     align-items: center;
     justify-content: left;
-    border-bottom: 1px solid rgb(54, 54, 54); /* Border bottom to make it look more like DuckDuckGo */
     background: rgb(255, 255, 255); /* Darker background for the top search portion */
     height: 5rem; /* Set the height */
     position: sticky;
