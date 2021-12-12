@@ -217,7 +217,7 @@ font-family: "Font Awesome 5 Free";
     position: absolute;
     left: 10%;
     margin-top: 2rem;
-    width: 40rem;
+    width: 70rem;
     margin-right: calc(100% - var(--card-width));
 }
 

@@ -32,12 +32,6 @@ func init() {
 }
 
 func did_you_mean(phrase string) (string, error) {
-	var err error
-	es, err := elasticsearch.NewDefaultClient()
-
-	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
-	}
 
 	data := `{
 				"size":0,
@@ -49,18 +43,22 @@ func did_you_mean(phrase string) (string, error) {
 				"sort": {
 					"_score": "desc"
 				}
-			}
-		`
+		}`
+
 	payload := fmt.Sprintf(data, phrase)
 
 	res, err := es.Search(
-		es.Search.WithBody(strings.NewReader(payload)))
+		es.Search.WithBody(strings.NewReader(payload)),
+		es.Search.WithIndex("searchengine"),
+	)
+
 	if err != nil {
 		log.Println("something went wrong while suggestion", err)
 		return "", err
 	}
 
 	buf, err := io.ReadAll(res.Body)
+
 	if err != nil {
 		log.Println("error while reading response", err)
 		return "", err
@@ -285,6 +283,9 @@ func ElasticSearch(result *Query, pagenum int) error {
 	if result.Number == 0 {
 		result.Pages = append(result.Pages, 1)
 		result.Suggestion, err = did_you_mean(result.Search)
+
+		log.Println(result.Suggestion)
+
 		if err != nil {
 			return err
 		}
