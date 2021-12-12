@@ -43,17 +43,21 @@
 		
 		{{range $v := .Results}}
 		<section class="website-container">
-			<h2>
-			{{if $v.Favicon }}
-			<img src="{{$v.Favicon}}" height="14" width="14"></img>
-			<a style="padding-left: 25px;" href="{{$v.Url}}">{{$v.Title}}</a>
+			{{if eq $v.Image "image"}}
+			<div></div>
 			{{else}}
-			<!--<img src="{{$v.Favicon}}" height="14" width="14"></img>-->
-			<a href="{{$v.Url}}">{{$v.Title}}</a>
+				<h2>
+				{{if $v.Favicon }}
+				<img src="{{$v.Favicon}}" height="14" width="14"></img>
+				<a style="padding-left: 25px;" href="{{$v.Url}}">{{$v.Title}}</a>
+				{{else}}
+				<!--<img src="{{$v.Favicon}}" height="14" width="14"></img>-->
+				<a href="{{$v.Url}}">{{$v.Title}}</a>
+				{{end}}
+				</h2>
+				<i><div class="smoll" role="text">{{$v.Url}}</div></i>
+				<p class="para">{{$v.Description}}</a></p>
 			{{end}}
-			</h2>
-			<i><div class="smoll" role="text">{{$v.Url}}</div></i>
-			<p class="para">{{$v.Description}}</a></p>
 		</section>
 		{{end}}
 

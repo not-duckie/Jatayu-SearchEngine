@@ -15,11 +15,22 @@ import (
 )
 
 type MetaData struct {
-	Rank        int    `json:"rank"`
+	Rank int `json:"rank"`
+
+	TypeDoc     string `json:"typedoc"`
 	Url         string `json:"url"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Favicon     string `json:"favicon"`
+}
+
+func checkImage(url string) bool {
+	for _, i := range []string{"jpg", "jpeg", "png", "bmp", "svg", "xml"} {
+		if ok := strings.HasSuffix(url, i); ok {
+			return true
+		}
+	}
+	return false
 }
 
 func fetchMeta(page string, meta *MetaData) error {
@@ -89,6 +100,12 @@ func fetchMeta(page string, meta *MetaData) error {
 	meta.Description = string(description)
 	meta.Favicon = favicon
 	meta.Rank = rank
+
+	if checkImage(title) {
+		meta.TypeDoc = "image"
+	} else {
+		meta.TypeDoc = "not image"
+	}
 
 	if string(title) == "" {
 		return fmt.Errorf("empty Title")
