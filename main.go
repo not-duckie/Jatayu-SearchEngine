@@ -6,10 +6,6 @@ import (
 
 func main() {
 
-	//	url := "https://www.ndtv.com/"
-
-	//	crawler.InitiateCrawler(url)
-
 	http.HandleFunc("/", Homepage)
 	http.Handle("/static/", http.FileServer(http.Dir("./templates")))
 	http.HandleFunc("/crawler", Crawler)

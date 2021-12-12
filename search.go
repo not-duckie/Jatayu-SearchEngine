@@ -228,7 +228,7 @@ func ImageSearch(result *Query, pagenum int) error {
 
 		result.Results = append(result.Results, res)
 
-		log.Println(result.Results)
+		//log.Println(result.Results)
 	}
 	return nil
 }
