@@ -24,9 +24,10 @@ type MetaData struct {
 	Favicon     string `json:"favicon"`
 }
 
-func checkImage(url string) bool {
-	for _, i := range []string{"jpg", "jpeg", "png", "bmp", "svg", "ico", "JPG", "JPEG", "PNG", "BMP", "SVG", "ICO"} {
-		if ok := strings.HasSuffix(url, i); ok {
+func checkImage(contenttype string) bool {
+	log.Println(contenttype)
+	for _, i := range []string{"octet-stream", "jpg", "jpeg", "png", "bmp", "svg", "ico", "JPG", "JPEG", "PNG", "BMP", "SVG", "ICO"} {
+		if ok := strings.HasSuffix(contenttype, i); ok {
 			return true
 		}
 	}
@@ -101,7 +102,7 @@ func fetchMeta(page string, meta *MetaData) (bool, error) {
 	meta.Favicon = favicon
 	meta.Rank = rank
 
-	if checkImage(meta.Url) {
+	if checkImage(resp.Header["Content-Type"][0]) {
 		return true, nil
 	} else {
 		return false, nil
