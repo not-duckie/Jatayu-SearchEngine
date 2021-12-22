@@ -9,6 +9,12 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/all.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/v4-shims.css">
 
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link href="static/Style/jquery-ui.css" rel="Stylesheet"></link>
+	<script src="static/JS/jquery-ui.js" ></script>
+	<script src="static/JS/jquery-migrate-3.0.0.js"></script>
+
 	<link href="static/Style/bootstrap.min.css" rel="stylesheet">
     <title>Jatayu</title>
 </head>
@@ -39,8 +45,8 @@
 	
 	<section class="header">
         <a href="/"><img class="jatayu-logo" href="/" src="static/Images/logo.png" /></a>
-        <form method="GET" action="/search">
-				<input type="text" name="q" id="search-text" value="{{.Search}}" required autocomplete="off"></input>
+        <form method="GET"  action="/search">
+				<input type="text" id="search-text" name="q" value="{{.Search}}" required autocomplete="off">
                 <!--<span class="search-icon" id="delete" onclick="document.getElementById('search-text').value=''">&times</span> -->
                 <button class="search-icon" ><i class="fas fa-search"></i></button>
 		</form>
@@ -98,7 +104,51 @@
 		<br>
 </main> 
 <script src="static/JS/script.js"></script>
-	
+<script>
+    const $source = document.querySelector('#search-text');
+	$('.ui-autocomplete-input').css('width','300px')
+
+    const typeHandler = function(e) {
+        console.log(e.target.value);
+
+        $.ajax({
+            url: "/autocomplete?q="+e.target.value,
+            type : 'GET',
+            cache: false,
+            success: function(html)
+            {
+                console.log(html)
+                var data = html
+                var _ = []
+
+                $.each(data, (index, value)=>{
+                    _.push($("<div/>").html(value.key).text())
+                });
+                
+
+                
+			$( "#search-text" ).autocomplete({		
+				source: _
+             }).data("ui-autocomplete")._renderItem = function( ul, item ) {
+            let txt = String(item.value).replace(new RegExp(this.term, "gi"),"<b style=\"color:#58B792;\">$&</b>");
+            return $("<li></li>")
+                .data("ui-autocomplete-item", item)
+                .append("<a>" + txt + "</a>")
+                .appendTo(ul);
+        };
+				
+            }
+        });
+    
+	}
+
+    
+	$source.addEventListener('input', typeHandler) // register for oninput
+    $source.addEventListener('propertychange', typeHandler) // for IE8
+
+
+
+</script>
 </body>
 
 </html>

@@ -40,7 +40,6 @@ width: 100%;
 
 .header .search-icon{
     padding: 0.4em 0.4em; /* Add padding to the search icon  */
-	box-shadow: 0 1px 3px rgb(0 0 0 / 50%);
     border-top-right-radius: 10px; /* Add border-radius to top right & bottom right for better look  */
     border-bottom-right-radius: 10px;
     height: 44.5px; /* Set size of search icon */
@@ -65,7 +64,6 @@ width: 100%;
     border-bottom-left-radius: 10px;
     border: none;
     outline: none;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 50%);
     background-color: #ffffff;
     height: 44.5px;
     color: #000000;
