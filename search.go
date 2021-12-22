@@ -219,7 +219,10 @@ func ImageSearch(result *Query, pagenum int) error {
 		`
 
 	from := pagenum*10 - 10
-	payload := fmt.Sprintf(data, from, html.EscapeString(result.Search))
+
+	str := strings.ReplaceAll(result.Search, "   ", "")
+
+	payload := fmt.Sprintf(data, from, str)
 	resp, err := es.Search(
 		es.Search.WithIndex("searchengine_images"),
 		es.Search.WithBody(strings.NewReader(payload)),
@@ -313,7 +316,10 @@ func ElasticSearch(result *Query, pagenum int) error {
 		`
 
 	from := pagenum*10 - 10
-	payload := fmt.Sprintf(data, from, html.EscapeString(result.Search))
+
+	str := strings.ReplaceAll(result.Search, "   ", "")
+	payload := fmt.Sprintf(data, from, str)
+
 	resp, err := es.Search(
 		es.Search.WithIndex("searchengine"),
 		es.Search.WithBody(strings.NewReader(payload)),
