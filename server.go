@@ -140,7 +140,9 @@ func Crawler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		r.ParseForm()
 		website = string(r.FormValue("website"))
-		threads, err = strconv.Atoi(string(r.FormValue("threads")[0]))
+		threads, err = strconv.Atoi(string(r.FormValue("threads")))
+
+		log.Println(website, threads)
 
 		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
@@ -152,11 +154,13 @@ func Crawler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("Invalid url provided!!!"))
+			return
 		} else {
 			err := crawler.InitiateCrawler(website, threads)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("Something Went Wrong"))
+				return
 			}
 		}
 	}
@@ -165,6 +169,7 @@ func Crawler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Something Went Wrong"))
+		return
 	}
 
 	tmpl.Execute(w, nil)

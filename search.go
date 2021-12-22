@@ -204,6 +204,16 @@ func ImageSearch(result *Query, pagenum int) error {
 				"query":    "%s", 
 				"fields": [ "url" ] 
 				}
+			},
+			"collapse": {
+    			"field": "url.keyword"
+  			},
+			"aggs": {
+			"total": {
+			"cardinality": {
+					"field": "url.keyword"
+					}
+				}
 			}
 		}
 		`
@@ -234,7 +244,10 @@ func ImageSearch(result *Query, pagenum int) error {
 	result.Time = tmp.(map[string]interface{})["took"].(float64) / 1000
 
 	hits := tmp.(map[string]interface{})["hits"]
-	total := hits.(map[string]interface{})["total"]
+
+	aggr := tmp.(map[string]interface{})["aggregations"]
+
+	total := aggr.(map[string]interface{})["total"]
 
 	result.Number = int64(total.(map[string]interface{})["value"].(float64))
 
@@ -285,6 +298,16 @@ func ElasticSearch(result *Query, pagenum int) error {
 				"query":    "%s", 
 				"fields": [ "title", "description","url" ] 
 				}
+			},
+			"collapse": {
+    			"field": "url.keyword"
+  			},
+			"aggs": {
+				"total": {
+				"cardinality": {
+						"field": "url.keyword"
+					}
+				}
 			}
 		}
 		`
@@ -306,6 +329,7 @@ func ElasticSearch(result *Query, pagenum int) error {
 		log.Println("error while reading response", err)
 		return err
 	}
+
 	defer resp.Body.Close()
 
 	var tmp interface{}
@@ -315,7 +339,9 @@ func ElasticSearch(result *Query, pagenum int) error {
 	result.Time = tmp.(map[string]interface{})["took"].(float64) / 1000
 
 	hits := tmp.(map[string]interface{})["hits"]
-	total := hits.(map[string]interface{})["total"]
+
+	aggr := tmp.(map[string]interface{})["aggregations"]
+	total := aggr.(map[string]interface{})["total"]
 
 	result.Number = int64(total.(map[string]interface{})["value"].(float64))
 
