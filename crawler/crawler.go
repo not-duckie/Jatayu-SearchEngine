@@ -115,7 +115,7 @@ func fetchMeta(page string, meta *MetaData) (bool, error) {
 func fetchUrl(url string) (map[string]bool, error) {
 
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 20 * time.Second,
 	}
 
 	resp, err := client.Get(url)
