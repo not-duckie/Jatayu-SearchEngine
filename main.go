@@ -13,7 +13,7 @@ func main() {
 	http.HandleFunc("/autocomplete", Autocomplete)
 	http.HandleFunc("/images", Image)
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServeTLS(":443", "cert/server.crt", "cert/server.key", nil); err != nil {
 		panic(err)
 	}
 }
