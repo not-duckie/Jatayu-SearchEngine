@@ -161,6 +161,7 @@ func sendToElastic(meta *MetaData, image bool) error {
 
 	// set the request header Content-Type for json
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Authorization", "Basic ZWxhc3RpYzpXM2lDMVlyMnlGdjRkVFF1Qlp3Mw==")
 	_, err = client.Do(req)
 	if err != nil {
 		log.Println("Error sending request to elastic search")

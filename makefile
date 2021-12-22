@@ -1,2 +1,3 @@
 default:
-	go build -o bin/jatayu
+	CGO_ENABLED=0 go build -o bin/jatayu
+	strip bin/jatayu

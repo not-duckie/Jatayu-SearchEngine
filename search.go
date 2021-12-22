@@ -25,7 +25,15 @@ var es *elasticsearch.Client
 
 func init() {
 	var err error
-	es, err = elasticsearch.NewDefaultClient()
+
+	cfg := elasticsearch.Config{
+		Addresses: []string{
+			"http://elastic:W3iC1Yr2yFv4dTQuBZw3@localhost:9200",
+			"http://elastic:W3iC1Yr2yFv4dTQuBZw3@localhost:9300",
+		},
+	}
+
+	es, err = elasticsearch.NewClient(cfg)
 
 	if err != nil {
 		log.Fatalf("Error creating the client: %s", err)
