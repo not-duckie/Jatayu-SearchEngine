@@ -9,10 +9,13 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+var wg sync.WaitGroup
 
 type MetaData struct {
 	Rank int `json:"rank"`
@@ -132,6 +135,11 @@ func fetchUrl(url string) (map[string]bool, error) {
 	findUrl := regexp.MustCompile("(http|https|)[:]*//[/a-zA-Z0-9_.-]+")
 	tmp := findUrl.FindAll(data, -1)
 	urlList := make(map[string]bool)
+
+	if len(tmp) == 0 {
+		return nil, fmt.Errorf("out of range")
+	}
+
 	for _, i := range tmp {
 		urlList[string(i)] = false
 	}
@@ -177,19 +185,31 @@ func InitiateCrawler(url string) error {
 	//urlList := append(fetchUrl(url), []byte(url))
 	urlList, err := fetchUrl(url)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	urlList[url] = false
-	for page := range urlList {
-		img, err := fetchMeta(page, meta)
 
-		if err != nil {
-			log.Printf("skiping %v.\nreason %v", page, err)
+	count := 0
+
+	for page := range urlList {
+
+		if count == 5 {
+			wg.Wait()
 		}
-		if err := sendToElastic(meta, img); err != nil {
-			return err
-		}
+
+		go func() {
+			img, err := fetchMeta(page, meta)
+
+			if err != nil {
+				log.Printf("skiping %v.\nreason %v", page, err)
+			}
+			if err := sendToElastic(meta, img); err != nil {
+				log.Println(err)
+			}
+		}()
 		//log.Println(meta)
+		count++
 	}
 	return nil
 }
