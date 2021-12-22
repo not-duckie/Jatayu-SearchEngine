@@ -134,16 +134,26 @@ func Image(w http.ResponseWriter, r *http.Request) {
 
 func Crawler(w http.ResponseWriter, r *http.Request) {
 	var website string
+	var threads int
+	var err error
+
 	if r.Method == "POST" {
 		r.ParseForm()
 		website = string(r.FormValue("website"))
+		threads, err = strconv.Atoi(string(r.FormValue("threads")[0]))
+
+		if err != nil {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Invalid number of threads provided!!!"))
+			return
+		}
 
 		_, err := url.ParseRequestURI(website)
 		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("Invalid url provided!!!"))
 		} else {
-			err := crawler.InitiateCrawler(website)
+			err := crawler.InitiateCrawler(website, threads)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("Something Went Wrong"))

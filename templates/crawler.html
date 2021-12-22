@@ -44,8 +44,14 @@
 			<h1><strong>Crawl A Website</strong></h1>
 			
 			<div id="search">
-					<input spellcheck="false" id="source" type="search" name="crawl">
-					<buttom  onclick="main();" id="mag" class="fas fa-search fa-lg"></button>
+					<input spellcheck="false" id="source" type="search" name="crawl"></input>
+			</div>
+			
+			<div id="search">
+					<input name="threads" id="threads" min=1 style="text-align:center;" type="number" value="5">
+			</div>
+			<div>
+			<buttom  onclick="main();" id="mag" class="fas fa-search fa-lg">Crawl</button>
 			</div>
 
 			<div id="loading" style="display: none;">
@@ -67,7 +73,7 @@
 <script>
 function makePostRequest(path) {
     return new Promise(function (resolve, reject) {
-        axios.post(path,"website="+document.getElementById("source").value).then(
+        axios.post(path,"website="+document.getElementById("source").value+"&threads="+document.getElementById("threads").value).then(
             (response) => {
                 var result = response.data;
                 console.log('Processing Request');

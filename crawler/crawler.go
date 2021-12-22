@@ -178,9 +178,13 @@ func sendToElastic(meta *MetaData, image bool) error {
 	return nil
 }
 
-func InitiateCrawler(url string) error {
+func InitiateCrawler(url string, threads int) error {
 	meta := &MetaData{}
-	log.Println("Starting crawler for url := ", url)
+	log.Printf("Starting crawler for url := %v with threads := %v", url, threads)
+
+	if threads <= 0 {
+		threads = 5
+	}
 
 	//urlList := append(fetchUrl(url), []byte(url))
 	urlList, err := fetchUrl(url)
@@ -207,7 +211,7 @@ func InitiateCrawler(url string) error {
 			wg.Done()
 		}()
 		//log.Println(meta)
-		if count == 5 {
+		if count == threads {
 			wg.Wait()
 			count = 0
 		}
