@@ -14,7 +14,7 @@
 
   
 
- ![](images/Pasted image 20211222095957.png)
+ ![]("images/Pasted image 20211222095957.png")
 
   
 
@@ -29,7 +29,7 @@ The search page provides enhanced search results that are related to the searche
   
   
 
-![](images/Pasted image 20211222115510.png)
+![]("images/Pasted image 20211222115510.png")
 
   
   
@@ -38,7 +38,7 @@ The user can visit different page numbers by clicking on the page numbers at the
 
   
 
-![](images/Pasted image 20211222120737.png)
+![]("images/Pasted image 20211222120737.png")
 
   
 
@@ -52,13 +52,13 @@ Users can search images via file format such as jpg
 
   
 
-![](images/Pasted image 20211222121613.png)
+![]("images/Pasted image 20211222121613.png")
 
   
 
 Further users can search through images via search query ex  `samsung`
 
-![](images/Pasted image 20211222121546.png)
+![]("images/Pasted image 20211222121546.png")
 
   
   
@@ -71,7 +71,7 @@ The `did you mean` feature comes in handy when the input data is close to the se
 
   
 
-![](images/Pasted image 20211222120526.png)
+![]("images/Pasted image 20211222120526.png")
 
   
 
@@ -85,7 +85,7 @@ This works by using jquery to send input data to a backend api called `/autocomp
 
   
 
-![](images/Pasted image 20211222121109.png)
+![]("images/Pasted image 20211222121109.png")
 
   
   
@@ -104,7 +104,7 @@ In order to use the crawler just input any website into the input box and the cr
 
   
 
-![](images/Pasted image 20211222110750.png)
+![]("images/Pasted image 20211222110750.png")
 
   
 
@@ -128,7 +128,7 @@ By contrast, our private search engine doesn’t track your searches and  help 
 
   
 
-![](images/Pasted image 20211222101240.png)
+![]("images/Pasted image 20211222101240.png")
 
   
 
@@ -163,4 +163,4 @@ Since the server is running self signed ssl certificate so you will require to a
 1. Click on `Advanced`
 2. Click on `Proceed to 127.0.0.1`
 
-![](images/Pasted image 20211222152014.png)
+![]("images/Pasted image 20211222152014.png")
