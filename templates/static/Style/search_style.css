@@ -215,7 +215,7 @@ font-family: "Font Awesome 5 Free";
 
 .search-results {
     position: absolute;
-    left: 10%;
+    left: 100px;
     margin-top: 2rem;
     width: 70rem;
     margin-right: calc(100% - var(--card-width));

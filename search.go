@@ -29,7 +29,6 @@ func init() {
 	cfg := elasticsearch.Config{
 		Addresses: []string{
 			"http://elastic:W3iC1Yr2yFv4dTQuBZw3@localhost:9200",
-			"http://elastic:W3iC1Yr2yFv4dTQuBZw3@localhost:9300",
 		},
 	}
 
