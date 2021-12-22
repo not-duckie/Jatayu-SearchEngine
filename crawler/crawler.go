@@ -28,7 +28,7 @@ type MetaData struct {
 }
 
 func checkImage(contenttype string) bool {
-	log.Println(contenttype)
+	log.Println(strings.ToLower(contenttype))
 	for _, i := range []string{"octet-stream", "jpg", "jpeg", "png", "bmp", "svg", "ico"} {
 		if ok := strings.HasSuffix(strings.ToLower(contenttype), i); ok {
 			return true
