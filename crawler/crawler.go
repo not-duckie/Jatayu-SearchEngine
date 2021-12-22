@@ -29,8 +29,8 @@ type MetaData struct {
 
 func checkImage(contenttype string) bool {
 	log.Println(contenttype)
-	for _, i := range []string{"octet-stream", "jpg", "jpeg", "png", "bmp", "svg", "ico", "JPG", "JPEG", "PNG", "BMP", "SVG", "ICO", "srt", "SRT"} {
-		if ok := strings.HasSuffix(contenttype, i); ok {
+	for _, i := range []string{"octet-stream", "jpg", "jpeg", "png", "bmp", "svg", "ico"} {
+		if ok := strings.HasSuffix(strings.ToLower(contenttype), i); ok {
 			return true
 		}
 	}
@@ -193,10 +193,7 @@ func InitiateCrawler(url string) error {
 	count := 0
 
 	for page := range urlList {
-
-		if count == 5 {
-			wg.Wait()
-		}
+		wg.Add(1)
 
 		go func() {
 			img, err := fetchMeta(page, meta)
@@ -207,8 +204,13 @@ func InitiateCrawler(url string) error {
 			if err := sendToElastic(meta, img); err != nil {
 				log.Println(err)
 			}
+			wg.Done()
 		}()
 		//log.Println(meta)
+		if count == 5 {
+			wg.Wait()
+			count = 0
+		}
 		count++
 	}
 	return nil
